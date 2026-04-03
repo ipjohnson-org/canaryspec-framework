@@ -1,14 +1,13 @@
 import { build } from 'esbuild';
 
 // IIFE bundle for V8 embedding — self-installs on globalThis
+// The bundle is a self-executing function that calls install() internally
 await build({
-  entryPoints: ['src/index.ts'],
+  entryPoints: ['src/iife.ts'],
   bundle: true,
   format: 'iife',
-  globalName: '__canaryspec',
   outfile: 'dist/framework.bundle.js',
   target: 'es2022',
-  footer: { js: '__canaryspec.install();' },
 });
 
 // ESM module for Node imports and testing

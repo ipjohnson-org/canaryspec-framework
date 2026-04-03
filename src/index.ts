@@ -27,6 +27,7 @@ export function install(): void {
   const g = globalThis as Record<string, unknown>;
 
   g.check = runner.check;
+  g.test = runner.check; // Playwright compatibility — accepts recorded scripts as-is
 
   // Host-facing APIs
   g.__getRegistrations = runner.getRegistrations;
