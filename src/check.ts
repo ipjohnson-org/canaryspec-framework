@@ -10,6 +10,7 @@ import { createOnCleanup } from './cleanup.js';
 import { createMetric, createAnnotate, createDegrade } from './observability.js';
 import { createEnv } from './env.js';
 import { createFetch } from './fetch.js';
+import { createPage } from './page.js';
 import { createExtendedCheck } from './fixtures.js';
 import type { CanaryContext, CheckOptions, CheckResult, FixtureDefinitions } from './types.js';
 
@@ -71,6 +72,9 @@ export function createCheckRunner() {
     const state = createState();
     const gen = createGen();
 
+    // Only create page if the browser shim is available
+    const hasPage = '__page' in globalThis;
+
     const ctx: CanaryContext = {
       fetch: createFetch(),
       expect: createExpect(),
@@ -84,7 +88,14 @@ export function createCheckRunner() {
       annotate: createAnnotate(state),
       degrade: createDegrade(state),
       gen,
+      ...(hasPage ? { page: createPage(gen) } : {}),
     };
+
+    // Set all context functions as globals so checks can use them without destructuring
+    const g = globalThis as Record<string, unknown>;
+    for (const [key, value] of Object.entries(ctx)) {
+      g[key] = value;
+    }
 
     const start = Date.now();
 

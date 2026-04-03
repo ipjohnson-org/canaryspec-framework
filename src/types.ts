@@ -186,6 +186,7 @@ export interface CanaryContext {
   annotate(key: string, value: string | number | boolean): void;
   degrade(reason: string): void;
   gen: Gen;
+  page?: import('./page.js').Page;
   [key: string]: unknown;
 }
 
