@@ -1,0 +1,6 @@
+[
+  { "name": "zod", "file": "zod.min.js", "global": "z" },
+  { "name": "microdiff", "file": "microdiff.min.js", "global": "microdiff", "aliases": "var diff = microdiff.default;" },
+  { "name": "dayjs", "file": "dayjs.min.js", "global": "dayjs" },
+  { "name": "ms", "file": "ms.min.js", "global": "ms" }
+]
