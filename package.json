@@ -15,6 +15,13 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ipjohnson-org/canaryspec-framework.git"
+  },
   "devDependencies": {
     "dayjs": "^1.11.20",
     "esbuild": "^0.25.0",
