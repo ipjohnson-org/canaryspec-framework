@@ -164,7 +164,7 @@ export interface Locator {
 
   // Evaluate
   evaluate<T = unknown>(expression: string): Promise<T>;
-  evaluate<T = unknown>(fn: (el: Element, ...args: unknown[]) => T, arg?: unknown): Promise<T>;
+  evaluate<T = unknown>(fn: (el: any, ...args: unknown[]) => T, arg?: unknown): Promise<T>;
 
   // Screenshot
   screenshot(options?: ScreenshotOptions): Promise<string>;
@@ -183,7 +183,7 @@ function getHost(): PageHost {
   return host;
 }
 
-function serializeOptions(options?: Record<string, unknown>): string | undefined {
+function serializeOptions(options?: object): string | undefined {
   return options ? JSON.stringify(options) : undefined;
 }
 

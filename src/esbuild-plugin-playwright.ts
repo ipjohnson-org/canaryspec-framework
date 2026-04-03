@@ -4,13 +4,15 @@
  *
  * Playwright's `test`, `expect`, `Page`, etc. are provided as globals by the
  * CanarySpec framework, so the import is unnecessary and would fail at runtime.
+ *
+ * This file is used at build time (Node.js) only — it is NOT bundled into the
+ * IIFE framework bundle that runs in V8. Excluded from tsconfig type checking.
  */
-import type { Plugin } from 'esbuild';
 
 const PLAYWRIGHT_IMPORT_RE = /import\s*\{[^}]*\}\s*from\s*['"]@playwright\/test['"];?\s*\n?/g;
 const PLAYWRIGHT_IMPORT_STAR_RE = /import\s*\*\s*as\s+\w+\s+from\s*['"]@playwright\/test['"];?\s*\n?/g;
 
-export function playwrightStripPlugin(): Plugin {
+export function playwrightStripPlugin() {
   return {
     name: 'canary-playwright-strip',
     setup(build) {
