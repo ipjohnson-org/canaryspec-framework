@@ -40,9 +40,12 @@ export function createExtendedCheck(
         const fixtureCtx = { ...ctx, ...fixtureValues } as CanaryContext;
 
         // Promise gate: value resolves when use() called, teardown resolves when body done
-        let valueReady!: (value: unknown) => void;
-        const valuePromise = new Promise<unknown>(resolve => {
-          valueReady = resolve;
+        let valueResolve!: (value: unknown) => void;
+        let valueReject!: (reason: unknown) => void;
+        let useWasCalled = false;
+        const valuePromise = new Promise<unknown>((resolve, reject) => {
+          valueResolve = resolve;
+          valueReject = reject;
         });
 
         let teardownSignal!: () => void;
@@ -50,12 +53,28 @@ export function createExtendedCheck(
           teardownSignal = resolve;
         });
 
-        // Start factory — it calls use(value) then awaits teardown gate
+        // Start factory — it calls use(value) then awaits teardown gate.
+        // If the factory throws or returns before calling use(), reject valuePromise
+        // so the awaiter sees the error instead of hanging forever.
         const factoryPromise = (async () => {
-          await factory(fixtureCtx, async (value: unknown) => {
-            valueReady(value);
-            await teardownGate;
-          });
+          try {
+            await factory(fixtureCtx, async (value: unknown) => {
+              useWasCalled = true;
+              valueResolve(value);
+              await teardownGate;
+            });
+            if (!useWasCalled) {
+              valueReject(new Error(`Fixture '${fixtureName}' completed without calling use()`));
+            }
+          } catch (e) {
+            if (!useWasCalled) {
+              // Error is already surfaced via valuePromise; don't rethrow to avoid
+              // an unhandled rejection on the unawaited factoryPromise.
+              valueReject(e);
+              return;
+            }
+            throw e;
+          }
         })();
 
         // Wait for setup to complete

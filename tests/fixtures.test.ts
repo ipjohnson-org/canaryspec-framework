@@ -108,4 +108,34 @@ describe('fixtures', () => {
     const r = await fw.runCheck('test');
     ve(r.status).toBe('passed');
   });
+
+  it('fixture that throws before use() errors instead of hanging', async () => {
+    const fw = createFramework();
+    const withFailingAuth = fw.check.extend({
+      auth: async ({}, _use) => {
+        throw new Error('login failed');
+      },
+    });
+    withFailingAuth('test', async () => {
+      // body should never execute
+    });
+    const r = await fw.runCheck('test');
+    ve(r.status).toBe('errored');
+    ve(r.errorMessage).toBe('login failed');
+  });
+
+  it('fixture that returns without calling use() errors instead of hanging', async () => {
+    const fw = createFramework();
+    const withForgotten = fw.check.extend({
+      forgotten: async ({}, _use) => {
+        // forgot to call use()
+      },
+    });
+    withForgotten('test', async () => {
+      // body should never execute
+    });
+    const r = await fw.runCheck('test');
+    ve(r.status).toBe('errored');
+    ve(r.errorMessage).toMatch(/completed without calling use\(\)/);
+  });
 });
